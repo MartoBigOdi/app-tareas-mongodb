@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/MartoBigOdi/app-tareas-mongodb/issues"
   },
-  "homepage": "https://github.com/MartoBigOdi/app-tareas-mongodb#readme"
+  "homepage": "https://github.com/MartoBigOdi/app-tareas-mongodb#readme",
+  "dependencies": {
+    "passport": "^0.4.1"
+  }
 }
