@@ -5,9 +5,13 @@ const path = require('path');
 const exphbs = require('express-handlebars');
 const methodOvr = require('method-override');
 const session = require('express-session');
+const flash = require('connect-flash');
+const passport = require('passport');
 
 //Initiliaze
 const app = express();
+require('./database');
+
 
 //Setting
 app.set('port', process.env.PORT || 3085);//Acá seteamos el port número 3085. ESto dice si existe un puerto en mi computador que lo tome sino que utilice el 3085.
@@ -21,6 +25,7 @@ app.engine('.hbs',exphbs({ //ordenando el motor de plantilla
 app.set('view engine', '.hbs');
 
 //Midleware
+app.use(flash());
 app.use(express.urlencoded({extended:false}));
 app.use(methodOvr('_method'));//Dsd los form van a poder enviar otros tipos de datos, DELETE o PUT.
 app.use(session({ //Organizamos las sesiones.
@@ -28,6 +33,11 @@ app.use(session({ //Organizamos las sesiones.
     resave: true,
     saveUninitialized:true
 }));
+app.use(express.json());
+//Acá seteamos 'passport'.
+app.use(passport.initialize());
+app.use(passport.session());
+
 
 
 //Global Variables
@@ -38,16 +48,17 @@ app.use((req, res, next) =>{
     app.locals.message = req.flash('message');
     app.locals.correcto = req.flash('correcto');
     app.locals.usuarioRepetido = req.flash('usuarioRepetido');
+    app.locals.nuevoUsuario = req.flash('Usuario creado')
     app.locals.user = req.user;//De esta manera podemos mostrar el user que tenemos guardado en la session dsp del login o registro. En cualquier vista. 
     next();
    });
-
 
 //Routes 
 //Tienen que estar inicializadas sino va dar un err. debido que las rutas nombradas estan vacias.
 app.use(require('./routes/seguimiento'));
 app.use(require('./routes/index'));
 app.use(require('./routes/users'));
+app.use('/seguimiento',require('./routes/seguimiento')); //Aá conectamos esta carpeta 'seguimiento' con la ruta 'seguimietno.js porque se necesitan sus recursos para que puedan enviar o recibir.
 
 
 //Static Files
