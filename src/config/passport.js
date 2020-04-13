@@ -3,7 +3,7 @@ const passport = require('passport');
 //Acá elegimos la estrategia Local.
 const LocalStrategy = require('passport-local').Strategy;
 //Acá requirimos la base de datos.
-const User = require('../models/User');
+const User = require('../models/Users');
 const helpers = require('../helpers/helpers');
 
 //Acá en el Log in hacemos algo muy parecido que en el registro solamente que que en este caso vamos a utiliår el 'herlpersMatchpass' para comparar la password que nos pasan con la que tenemos en la base de datos. 
@@ -38,21 +38,25 @@ passport.use('registro.local', new LocalStrategy({
         passwordField:'password',
         passReqToCallback: true
 }, async (req, username, password, done) => { //En este callback no olvidarse de pasar el 'done' para que siga ejecutando lo que sigue en el servidor.
-        const { cargo, fullname, username, password } = req.body; //Los busco desde el req.body porque no los estoy pidiendo dsd el parametro de la estrategia. 
-       
+        const { cargo, fullname } = req.body; //Los busco desde el req.body porque no los estoy pidiendo dsd el parametro de la estrategia. 
+        const newUser = new User({
+                username,
+                password,
+                fullname,
+                cargo,
+        });
         //Acá hacemos la petición con la query para buscar la coincidencia con el username. 
-        const userNameNew = await User.findOne({username});
-        const fullNameNew = await User.findOne({fullname});
+        const userNameNew = await newUser.find({username});
+        const fullNameNew = await newUser.find({fullname});;
         //Hacemos un Condicional con una query para buscar si ya existe ese usuario.
         if(userNameNew.length > 0 || fullNameNew.length > 0 ) {
                 done(null, false, req.flash('usuarioRepetido', 'Usuario ya existente'));
         } else {
-                const newUser = new User({ cargo ,username, email, password });
-                newUser.password = await newUser.encryptPassword(password);
-                await newUser.save();
-                req.flash("nuevoUsuario", "Usuario Creado");
-                console.log(newUser);
+                //Acá ciframos la contraseña con el método que traemos desde el 'lib/helpers'.
+                newUser.password = await helpers.encryptPassword(password);
+                const result = await newUser.save();
                 //Aca devolvemos NULL al callback del 'done' para que siga ejecutando el codigo siguiente.
+                console.log(result);
                 return done(null, newUser);
          }
         

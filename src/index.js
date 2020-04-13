@@ -11,6 +11,7 @@ const passport = require('passport');
 //Initiliaze
 const app = express();
 require('./database');
+require('./config/passport');
 
 
 //Setting
@@ -69,7 +70,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 //Server is Listenning
 app.listen(app.get('port'), () => {
     console.log('Server on Port'.rainbow.italic, app.get('port'));
-    figlet.text('Prueba MONGOdb', {
+    figlet.text('Seguimiento', {
     font: 'doom',
     horizontalLayout: 'default',
     verticalLayout: 'default'
