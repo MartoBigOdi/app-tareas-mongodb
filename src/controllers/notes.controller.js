@@ -1,5 +1,6 @@
 const notesCtrl = {};
 
+
 // Models
 const Note = require("../models/Note");
 const User = require("../models/User");
@@ -9,17 +10,32 @@ const User = require("../models/User");
 //Controllers
 notesCtrl.renderNoteForm = (req, res) => {
   res.render("notes/new-note");
+  res.end;
 };
 
 
 
 
 notesCtrl.renderDashboard = async (req, res) => {
-  const users =  await User.find();
-  console.table(users);
-  const tareas = await Note.find().sort({ date: "desc" });
-  console.table(tareas);
-  res.render("notes/dashboard", {users, tareas});
+  try {
+    const users = await User.find();
+    console.table(users);
+    const tareas = await Note.find().sort({
+      date: "desc"
+    });
+    console.table(tareas);
+    res.render('notes/dashboard', 
+      {users,
+      tareas}
+    
+    );
+    res.end;
+
+  } catch (err) {
+    console.log(err);
+  };
+  
+
 };
 
 
@@ -28,16 +44,27 @@ notesCtrl.renderDashboard = async (req, res) => {
 
 notesCtrl.createDashboard = async (req, res) => {
   const errors = [];
-  const { title, descripción, urgencia, idUser} = req.body;
+  const {
+    title,
+    descripción,
+    urgencia,
+    idUser
+  } = req.body;
 
   if (!title) {
-    errors.push({ text: "Por Favor pone un Título" });
+    errors.push({
+      text: "Por Favor pone un Título"
+    });
   }
   if (!descripción) {
-    errors.push({ text: "Escribe la descripción" });
+    errors.push({
+      text: "Escribe la descripción"
+    });
   }
   if (!urgencia) {
-    errors.push({ text: "Escribe la descripción" });
+    errors.push({
+      text: "Escribe la descripción"
+    });
   }
   if (errors.length > 0) {
     res.render("notes/dashboard", {
@@ -47,7 +74,12 @@ notesCtrl.createDashboard = async (req, res) => {
       urgencia,
     });
   } else {
-    const newNote = new Note({title, descripción, urgencia, idUser});
+    const newNote = new Note({
+      title,
+      descripción,
+      urgencia,
+      idUser
+    });
     await newNote.save();
     req.flash("success_msg", "Nota agregada");
     res.redirect("/notes/dashboard");
@@ -58,16 +90,26 @@ notesCtrl.createDashboard = async (req, res) => {
 
 
 notesCtrl.createNewNote = async (req, res) => {
-  const { title, descripción, urgencia} = req.body;
+  const {
+    title,
+    descripción,
+    urgencia
+  } = req.body;
   const errors = [];
   if (!title) {
-    errors.push({ text: "Por Favor pone un Título." });
+    errors.push({
+      text: "Por Favor pone un Título."
+    });
   }
   if (!descripción) {
-    errors.push({ text: "Escribe la descripción" });
+    errors.push({
+      text: "Escribe la descripción"
+    });
   }
   if (!urgencia) {
-    errors.push({ text: "Escribe la descripción" });
+    errors.push({
+      text: "Escribe la descripción"
+    });
   }
   if (errors.length > 0) {
     res.render("notes/new-note", {
@@ -77,11 +119,15 @@ notesCtrl.createNewNote = async (req, res) => {
       urgencia
     });
   } else {
-    const newNote = new Note({ title, descripción, urgencia });
-    newNote.user = req.user.id; 
+    const newNote = new Note({
+      title,
+      descripción,
+      urgencia
+    });
+    newNote.user = req.user.id;
     await newNote.save();
     req.flash("success_msg", "Nota agregada");
-    res.redirect("/notes/all-notes");
+    res.redirect("/notes");
   }
 };
 
@@ -89,8 +135,21 @@ notesCtrl.createNewNote = async (req, res) => {
 
 
 notesCtrl.renderNotes = async (req, res) => {
-  const notes = await Note.find({ user: req.user.id }).sort({ date: "desc" });
-  res.render("notes/all-notes", { notes });
+  try {
+    const userNote = req.user.id;
+    const notes = await Note.find({
+      user: req.user.id
+    }).sort({
+      date: "desc"
+    });
+    res.render("notes/all-notes", 
+      {notes, userNote}
+    );
+    res.end;
+  } catch (err) {
+    console.log(err);
+  };
+
 };
 
 
@@ -103,7 +162,9 @@ notesCtrl.renderEditForm = async (req, res) => {
     req.flash("error_msg", "No se puede");
     return res.redirect("/notes");
   }
-  res.render("notes/edit-note", { note });
+  res.render("notes/edit-note", 
+    {note}
+  );
 };
 
 
@@ -111,8 +172,14 @@ notesCtrl.renderEditForm = async (req, res) => {
 
 
 notesCtrl.updateNote = async (req, res) => {
-  const { title, descripción, urgencia } = req.body;
-  await Note.findByIdAndUpdate(req.params.id, {title, descripción, urgencia});
+  const notaEdit = req.body;
+  await Note.findByIdAndUpdate(req.params.id, {
+    title,
+    descripción,
+    urgencia
+  });
+  console.log(notaEdit);
+
   req.flash("success_msg", "Nota actualizada");
   res.redirect("/notes");
 };

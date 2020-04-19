@@ -58,7 +58,7 @@ usersCtrl.singup = async (req, res) => {
       newUser.password = await newUser.encryptPassword(password);
       await newUser.save();
       req.flash("success_msg", "Registro Correcto.");
-      res.redirect("/users/signin");
+      res.redirect("/notes");
     }
   }
 };
